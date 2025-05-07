@@ -98,24 +98,26 @@ func main() {
 
 	stopMap := ConvertStopsToMap(stops)
 
-	selectedStop := selectStop(stops)
-	if selectedStop == nil {
-		fmt.Println("Nie znaleziono przystanku.")
-		return
-	}
+	for {
+		selectedStop := selectStop(stops)
+		if selectedStop == nil {
+			fmt.Println("Nie znaleziono przystanku.")
+			return
+		}
 
-	departures, err := utils.FetchDepartures(selectedStop.StopId)
-	if err != nil {
-		fmt.Println("Błąd pobierania odjazdów:", err)
-		return
-	}
+		departures, err := utils.FetchDepartures(selectedStop.StopId)
+		if err != nil {
+			fmt.Println("Błąd pobierania odjazdów:", err)
+			return
+		}
 
-	selectedRoutes := selectRoutes(departures)
-	if len(selectedRoutes) == 1 {
-		utils.MonitorRoute(selectedRoutes[0], stopMap)
-	} else if len(selectedRoutes) == 2 {
-		utils.MonitorRoutesConcurrently(selectedRoutes, stopMap)
-	} else {
-		fmt.Println("Nieprawidłowa liczba linii. Wybierz 1 lub 2.")
+		selectedRoutes := selectRoutes(departures)
+		if len(selectedRoutes) == 1 {
+			utils.MonitorRoute(selectedRoutes[0], stopMap)
+		} else if len(selectedRoutes) == 2 {
+			utils.MonitorRoutesConcurrently(selectedRoutes, stopMap)
+		} else {
+			fmt.Println("Nieprawidłowa liczba linii. Wybierz 1 lub 2.")
+		}
 	}
 }
