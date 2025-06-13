@@ -1,6 +1,5 @@
-go run ./cmd/weather.go aktualna Warszawa
-go run ./cmd/weather.go aktualna Krakow
-go run ./cmd/weather.go aktualna Gdansk, Poland
-go run ./cmd/weather.go prognoza Warszawa 5
-go run ./cmd/weather.go prognoza London 5
-go run ./cmd/weather.go historia Warszawa 2024-06-14
+go run ./cmd/weather.go aktualna -miasto="Warszawa"
+go run ./cmd/weather.go aktualna -miasto="Krakow"
+go run ./cmd/weather.go aktualna -miasto="Berlin"
+go run ./cmd/weather.go prognoza -miasto="Berlin" -dni=5
+go run ./cmd/weather.go historia -miasto="Berlin" -data=2024-06-14

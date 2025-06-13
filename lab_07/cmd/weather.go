@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"os"
 	"weather-cli/api"
@@ -11,43 +12,52 @@ import (
 	"github.com/olekukonko/tablewriter"
 )
 
+var (
+	aktualnaCmd = flag.NewFlagSet("aktualna", flag.ExitOnError)
+	prognozaCmd = flag.NewFlagSet("prognoza", flag.ExitOnError)
+	historiaCmd = flag.NewFlagSet("historia", flag.ExitOnError)
+)
+
 func main() {
-	if len(os.Args) < 3 {
-		fmt.Println("Użycie:")
-		fmt.Println("  pogoda aktualna <miasto>")
-		fmt.Println("  pogoda prognoza <miasto> [dni]")
-		fmt.Println("  pogoda historia <miasto> [data]")
-		return
+	if len(os.Args) < 2 {
+		fmt.Println("oczekiwano podkomendy: aktualna, prognoza lub historia")
+		os.Exit(1)
 	}
 
-	komenda := os.Args[1]
-	miasto := os.Args[2]
-	var dni int
-	var data string
-
-	if komenda == "prognoza" && len(os.Args) > 3 {
-		dni = utils.ParseInt(os.Args[3], 3)
-	}
-	if komenda == "historia" && len(os.Args) > 3 {
-		data = os.Args[3]
-	}
-
-	lat, lon, err := utils.CityToCoords(miasto)
-	if err != nil {
-		fmt.Println("Nie znaleziono miasta:", miasto)
-		return
-	}
-
-	switch komenda {
+	switch os.Args[1] {
 	case "aktualna":
+		miasto := aktualnaCmd.String("miasto", "", "Nazwa miasta")
+		aktualnaCmd.Parse(os.Args[2:])
+		if *miasto == "" {
+			fmt.Println("Użycie: pogoda aktualna -miasto=<miasto>")
+			return
+		}
+		lat, lon, err := utils.CityToCoords(*miasto)
+		if err != nil {
+			fmt.Println("Nie znaleziono miasta:", *miasto)
+			return
+		}
 		weather, err := api.GetCurrentWeather(lat, lon)
 		if err != nil {
 			fmt.Println("Błąd pobierania danych pogodowych:", err)
 			return
 		}
 		PrintWeatherTable([]models.WeatherData{weather})
+
 	case "prognoza":
-		forecast, err := api.GetForecast(lat, lon, dni)
+		miasto := prognozaCmd.String("miasto", "", "Nazwa miasta")
+		dni := prognozaCmd.Int("dni", 3, "Liczba dni prognozy")
+		prognozaCmd.Parse(os.Args[2:])
+		if *miasto == "" {
+			fmt.Println("Użycie: pogoda prognoza -miasto=<miasto> [-dni=<dni>]")
+			return
+		}
+		lat, lon, err := utils.CityToCoords(*miasto)
+		if err != nil {
+			fmt.Println("Nie znaleziono miasta:", *miasto)
+			return
+		}
+		forecast, err := api.GetForecast(lat, lon, *dni)
 		if err != nil {
 			fmt.Println("Błąd pobierania prognozy:", err)
 			return
@@ -55,15 +65,30 @@ func main() {
 		PrintWeatherTable(forecast)
 		AnalyzeForecast(forecast)
 		utils.PlotForecast(forecast)
+
 	case "historia":
-		history, err := api.GetHistory(lat, lon, data)
+		miasto := historiaCmd.String("miasto", "", "Nazwa miasta")
+		data := historiaCmd.String("data", "", "Data historyczna")
+		historiaCmd.Parse(os.Args[2:])
+		if *miasto == "" || *data == "" {
+			fmt.Println("Użycie: pogoda historia -miasto=<miasto> -data=<YYYY-MM-DD>")
+			return
+		}
+		lat, lon, err := utils.CityToCoords(*miasto)
+		if err != nil {
+			fmt.Println("Nie znaleziono miasta:", *miasto)
+			return
+		}
+		history, err := api.GetHistory(lat, lon, *data)
 		if err != nil {
 			fmt.Println("Błąd pobierania danych historycznych:", err)
 			return
 		}
 		PrintWeatherTable(history)
+
 	default:
-		fmt.Println("Nieznana komenda:", komenda)
+		fmt.Println("Nieznana komenda:", os.Args[1])
+		os.Exit(1)
 	}
 }
 
