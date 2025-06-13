@@ -17,7 +17,7 @@ func LoadCSV(path string) ([]models.StockData, error) {
 	defer file.Close()
 
 	reader := csv.NewReader(file)
-	_, _ = reader.Read() // skip header
+	_, _ = reader.Read() // pomiń header
 
 	var data []models.StockData
 	for {

@@ -39,7 +39,7 @@ func main() {
 		if i == 0 {
 			continue // pomiń nagłówek
 		}
-		// Twój plik: Date,Close/Last,Volume,Open,High,Low
+		// Wejściowy plik: Date,Close/Last,Volume,Open,High,Low
 		date := convertDate(row[0])
 		closeVal := clean(row[1])
 		volume := clean(row[2])
@@ -57,7 +57,7 @@ func clean(s string) string {
 }
 
 func convertDate(s string) string {
-	// Twój format: MM/DD/YYYY, sample: YYYY-MM-DD
+	// Wejściowy format: MM/DD/YYYY, sample: YYYY-MM-DD
 	parts := strings.Split(s, "/")
 	if len(parts) != 3 {
 		return s
